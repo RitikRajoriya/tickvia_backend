@@ -34,6 +34,8 @@ exports.HotelSearch = async (req, res) => {
       });
     }
 
+    
+
     const payload = {
       EndUserIp: "49.43.5.204", // Static or dynamic IP depending on API policy
       ClientId: "180137",
