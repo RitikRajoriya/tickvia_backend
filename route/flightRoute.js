@@ -33,4 +33,5 @@ const router = express.Router();
 router.post('/search', flightController.searchFlights); 
 router.post('/search/route', flightController.routeTrip); 
 router.post('/farerule', flightController.FareRule); 
+router.post('/fareprice', flightController.FarePrice); 
 module.exports = router;
