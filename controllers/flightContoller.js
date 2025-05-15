@@ -65,9 +65,8 @@ exports.routeTrip = async (req, res) => {
         childCount = 0,
         infantCount = 0,
       } = req.body;
-//   console.log(API_URL, CLIENT_ID, USERNAME, PASSWORD);
   
-      // Validate and format both dates
+      // Format date to YYYY-MM-DD
       const formatDate = (dateStr) => {
         const parsed = new Date(dateStr);
         if (isNaN(parsed)) throw new Error(`Invalid date format: ${dateStr}`);
@@ -77,37 +76,37 @@ exports.routeTrip = async (req, res) => {
       departureDate = formatDate(departureDate);
       returnDate = formatDate(returnDate);
   
+      // Construct payload matching working format
       const payload = {
         EndUserIp: "49.43.5.204",
-        ClientId: CLIENT_ID,
-        UserName: USERNAME,
-        Password: PASSWORD,
-        AdultCount: adults,
-        ChildCount: childCount,
-        InfantCount: infantCount,
+        ClientId: String(CLIENT_ID), // Ensure strings
+        UserName: String(USERNAME),
+        Password: String(PASSWORD),
+        AdultCount: String(adults),
+        ChildCount: String(childCount),
+        InfantCount: String(infantCount),
         JourneyType: "2", // Round Trip
-        DirectFlight: false,
-        OneStopFlight: false,
-        PreferredAirlines: null,
         Segments: [
           {
             Origin: origin,
             Destination: destination,
-            FlightCabinClass: 1,
+            FlightCabinClass: "1",
             PreferredDepartureTime: `${departureDate}T00:00:00`,
-            PreferredArrivalTime: `${departureDate}T23:59:00`
+            PreferredArrivalTime: `${departureDate}T00:00:00`
           },
           {
             Origin: destination,
             Destination: origin,
-            FlightCabinClass: 1,
+            FlightCabinClass: "1",
             PreferredDepartureTime: `${returnDate}T00:00:00`,
-            PreferredArrivalTime: `${returnDate}T23:59:00`
+            PreferredArrivalTime: `${returnDate}T00:00:00`
           }
         ],
         Sources: null
+        // ❌ Don't include DirectFlight, OneStopFlight, PreferredAirlines — they restrict results
       };
-  console.log(payload);
+  
+    //   console.log('Sending Payload:', payload);
   
       const response = await axios.post(`${API_URL}Search`, payload, {
         headers: {
@@ -117,11 +116,47 @@ exports.routeTrip = async (req, res) => {
       });
   
       res.status(200).json(response.data);
-    //   console.log('Round Trip Flight Search Response:',response);
-      
     } catch (error) {
-      console.error('Round Trip Flight Search Error:', error?.response?.data || error.message);
+      console.error('Round Trip F   light Search Error:', error?.response?.data || error.message);
       res.status(500).json({ error: 'Failed to search round trip flights' });
     }
   };
-
+  exports.FareRule = async (req, res) => {
+    try {
+      const {
+        TraceId,
+        ResultIndex,
+        SrdvType,
+        SrdvIndex
+      } = req.body;
+  
+      if (!TraceId || !ResultIndex || !SrdvType || !SrdvIndex) {
+        return res.status(400).json({ error: 'Missing required parameters.' });
+      }
+  
+      const payload = {
+        EndUserIp: "49.43.5.204",
+        ClientId: String(CLIENT_ID),
+        UserName: String(USERNAME),
+        Password: String(PASSWORD),
+        TraceId,
+        ResultIndex,
+        SrdvType,
+        SrdvIndex
+      };
+  
+      const response = await axios.post(`${API_URL}FareRule`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Token': TOKEN,
+        }
+      });
+  
+      res.status(200).json(response.data);
+    } catch (error) {
+      console.error('FareRule Error:', error?.response?.data || error.message);
+      res.status(500).json({ error: 'Failed to fetch fare rule' });
+    }
+  };
+  
+  
