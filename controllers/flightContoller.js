@@ -83,7 +83,7 @@ exports.routeTrip = async (req, res) => {
         AdultCount: String(adults),
         ChildCount: String(childCount),
         InfantCount: String(infantCount),
-        JourneyType: "2", // Round Trip
+        JourneyType: "2", 
         Segments: [
           {
             Origin: origin,
