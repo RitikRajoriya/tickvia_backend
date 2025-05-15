@@ -6,11 +6,11 @@ const CLIENT_ID = process.env.CLIENT_ID ;
 const USERNAME = 'Explore5'; 
 const PASSWORD = process.env.PASSWORD ;
 const TOKEN = 'Explore@50#1050';
-console.log(API_URL, CLIENT_ID, USERNAME, PASSWORD, TOKEN);
+
 
 exports.searchFlights = async (req, res) => {
     try {
-      let { origin, destination, departureDate, adults , childCount , infantCount  } = req.body;
+      let { origin, destination, departureDate, adults , childCount , infantCount ,fareType,flightCabinClass } = req.body;
   
     
       const formattedDate = new Date(departureDate).toISOString().split('T')[0];
@@ -24,11 +24,12 @@ exports.searchFlights = async (req, res) => {
         ChildCount: String(childCount),
         InfantCount: String(infantCount),
         JourneyType: "1", 
+        FareType: fareType || "1", 
         Segments: [
           {
-            Origin: origin,
+            Origin: origin, 
             Destination: destination,
-            FlightCabinClass: "1",
+            FlightCabinClass: flightCabinClass,
             PreferredDepartureTime: `${formattedDate}T00:00:00`,
             PreferredArrivalTime: `${formattedDate}T00:00:00` // Match working payload
           }
