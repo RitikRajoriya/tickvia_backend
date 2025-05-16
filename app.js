@@ -22,15 +22,15 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Server
 const PORT = process.env.PORT || 3000;
-db.connect((err) => {
-    if (err) {
-        console.error('Unable to connect to the database');
-        process.exit(1);
-    } else {
-        console.log('Database connected successfully');
+
+db.query('SELECT 1')
+.then(() => console.log('Database connected successfully'))
+.catch((err) => {
+  console.error('Database connection failed:', err);
+  process.exit(1);
+});
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
             console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
         });
-    }
-});
+    

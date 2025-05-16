@@ -1,24 +1,57 @@
-// server.js
 const express = require('express');
-const app = express();
-require('dotenv').config();
-const cors = require('cors');
-const db = require('./config/db'); 
-const flightRoutes = require('./route/flightRoute'); // Import flight routes
-app.use(express.json());
-app.use(cors());
+const axios = require('axios');
+const bodyParser = require('body-parser');
 
-const PORT =  6000;
-app.use('/api/v1/flights', flightRoutes);
-// Check if DB is connected before starting the server
-db.connect((err) => {
-    if (err) {
-        console.error('Unable to connect to the database');
-        process.exit(1); // If DB connection fails, stop the server
-    } else {
-        console.log('Database connected successfully');
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    }
+const app = express();
+app.use(bodyParser.json());
+
+const SMS_API_URL = "https://amazesms.in/api/pushsms";
+const USER = "Rahuljain";
+const AUTH_KEY = "92d8tYM01idnc";
+const SENDER = "WDMRKT";
+const ENTITY_ID = "1001581233511362172";
+const TEMPLATE_ID = "1007439327043893034";
+
+function generateOTP(length = 6) {
+  return Math.floor(100000 + Math.random() * 900000).toString().slice(0, length);
+}
+
+app.post('/send-otp', async (req, res) => {
+  const { mobile } = req.body;
+  if (!mobile) return res.status(400).json({ error: 'Mobile number is required' });
+
+  const otp =  generateOTP();
+  const text = `Your OTP is ${otp}. Do not share it with anyone.`;
+
+  try {
+    const response = await axios.get(SMS_API_URL, {
+      params: {
+        user: USER,
+        authkey: AUTH_KEY,
+        sender: SENDER,
+        mobile: mobile,
+        text: text,
+        entityid: ENTITY_ID,
+        templateid: TEMPLATE_ID
+      }
+    });
+console.log(`SMS API Response: ${response.data}`);
+
+    // Log or save OTP securely for verification
+    // console.log(`OTP for ${mobile}: ${otp}`);
+
+    res.json({
+      success: true,
+      message: 'OTP sent successfully',
+      otp // ⚠️ For development only. Remove this in production
+    });
+  } catch (error) {
+    console.error('SMS API Error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+const PORT = 4000;
+app.listen(PORT, () => {
+  console.log(`OTP API running on port ${PORT}`);
 });

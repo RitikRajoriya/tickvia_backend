@@ -31,5 +31,7 @@ const router = express.Router();
  */
 // Route to search for hotels
 router.post('/search', hotalController.HotelSearch);
-
+router.post('/gethotelinfo', hotalController.GetHotelInfo);
+router.post('/getroomlist', hotalController.GetHotelRoom);
+router.get('/cityid', hotalController.getCityId);
 module.exports = router;
