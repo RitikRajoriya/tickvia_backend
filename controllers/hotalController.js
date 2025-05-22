@@ -174,3 +174,60 @@ exports.GetHotelInfo = async (req, res) => {
       res.status(500).json({ error: 'Failed to retrieve hotel information' });
     }
   };
+  exports.BlockRoom = async (req, res) => {
+    try {
+      const {
+        EndUserIp,
+        TraceId,
+        SrdvType,
+        SrdvIndex,
+        ResultIndex,
+        HotelCode,
+        HotelRoomsDetails
+      } = req.body;
+  
+      // Basic validation for required fields
+      if (
+        !EndUserIp ||
+        !TraceId ||
+        !SrdvType ||
+        !SrdvIndex ||
+        !ResultIndex ||
+        !HotelCode ||
+        !HotelRoomsDetails ||
+        !Array.isArray(HotelRoomsDetails) ||
+        HotelRoomsDetails.length === 0
+      ) {
+        return res.status(400).json({
+          error:
+            'Missing or invalid required fields: EndUserIp, TraceId, SrdvType, SrdvIndex, ResultIndex, HotelCode, HotelRoomsDetails (array with at least 1 item).'
+        });
+      }
+  
+      // Construct the payload
+      const payload = {
+        ...req.body,
+        ClientId: CLIENT_ID,
+        UserName: USERNAME,
+        Password: PASSWORD
+      };
+  
+      console.log("BlockRoom Payload:", JSON.stringify(payload, null, 2));
+  
+      // Send request to external BlockRoom API
+      const response = await axios.post(`${API_URL}/BlockRoom`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Token': TOKEN
+        }
+      });
+  
+      // Send success response
+      res.status(200).json(response.data);
+  
+    } catch (error) {
+      console.error('BlockRoom Error:', error?.response?.data || error.message);
+      res.status(500).json({ error: 'Failed to block room.' });
+    }
+  };
+  

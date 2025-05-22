@@ -6,6 +6,7 @@ const cors = require('cors');
 const db = require('./config/db');
 const flightRoutes = require('./route/flightRoute');
 const hotelRoutes = require('./route/hotelRoute');
+const authRoutes = require('./route/authRoute');
 // Swagger
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swaggerConfig');
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/flights', flightRoutes);
 app.use('/api/v1/hotel', hotelRoutes);
 // Swagger docs route

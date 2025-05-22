@@ -34,4 +34,5 @@ router.post('/search', hotalController.HotelSearch);
 router.post('/gethotelinfo', hotalController.GetHotelInfo);
 router.post('/getroomlist', hotalController.GetHotelRoom);
 router.get('/cityid', hotalController.getCityId);
+router.post('/blockroom', hotalController.BlockRoom);
 module.exports = router;

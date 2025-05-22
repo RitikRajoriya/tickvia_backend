@@ -1,12 +1,13 @@
 const axios = require('axios');
 
 // API Credentials
+
 const API_URL = process.env.API_URL ;
 const CLIENT_ID = process.env.CLIENT_ID ;
 const USERNAME = 'Explore5'; 
 const PASSWORD = process.env.PASSWORD ;
 const TOKEN = 'Explore@50#1050';
-
+const EndUserIp = process.env.EndUserIp ;
 
 exports.searchFlights = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ exports.searchFlights = async (req, res) => {
       const formattedDate = new Date(departureDate).toISOString().split('T')[0];
   
       const payload = {
-        EndUserIp: "49.43.5.204", 
+        EndUserIp: EndUserIp, 
         ClientId: String(CLIENT_ID), 
         UserName: String(USERNAME),
         Password: String(PASSWORD), 
@@ -56,12 +57,12 @@ exports.routeTrip = async (req, res) => {
     try {
       let {
         origin,
-        destination,
+        destination,  
         departureDate,
         returnDate,
-        adults = 1,
-        childCount = 0,
-        infantCount = 0,
+        adults ,
+        childCount ,
+        infantCount ,
       } = req.body;
   
       // Format date to YYYY-MM-DD
@@ -76,7 +77,7 @@ exports.routeTrip = async (req, res) => {
   
       // Construct payload matching working format
       const payload = {
-        EndUserIp: "49.43.5.204",
+        EndUserIp: EndUserIp,
         ClientId: String(CLIENT_ID), 
         UserName: String(USERNAME),
         Password: String(PASSWORD),
@@ -133,7 +134,7 @@ exports.routeTrip = async (req, res) => {
       }
   
       const payload = {
-        EndUserIp: "49.43.5.204",
+        EndUserIp: EndUserIp,
         ClientId: String(CLIENT_ID),
         UserName: String(USERNAME),
         Password: String(PASSWORD),
@@ -192,3 +193,121 @@ exports.routeTrip = async (req, res) => {
             res.status(500).json({ error: 'Failed to fetch fare price' });
         }    
     };
+  
+
+  exports.SSRBook = async (req, res) => {
+        try {
+          
+        const {
+            TraceId,
+            ResultIndex,
+            SrdvType,
+            SrdvIndex
+        } = req.body;
+    
+        if (!TraceId || !ResultIndex || !SrdvType || !SrdvIndex) {
+            return res.status(400).json({ error: 'Missing required parameters.' });
+        }
+    
+        const payload = {
+            EndUserIp: EndUserIp,
+            ClientId: String(CLIENT_ID),
+            UserName: String(USERNAME),
+            Password: String(PASSWORD),
+            TraceId,
+            ResultIndex,
+            SrdvType,
+            SrdvIndex
+          };
+        const response = await axios.post(`${API_URL}SSR`, payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Api-Token': TOKEN,
+            }
+        });
+        res.status(200).json(response.data);
+        }
+        catch (error) {
+            console.error('FarePrice Error:', error?.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch fare price' });
+        }    
+    };
+
+      exports.SeatMaps = async (req, res) => {
+        try {
+          
+        const {
+            TraceId,
+            ResultIndex,
+            SrdvType,
+            SrdvIndex
+        } = req.body;
+    
+        if (!TraceId || !ResultIndex || !SrdvType || !SrdvIndex) {
+            return res.status(400).json({ error: 'Missing required parameters.' });
+        }
+    
+        const payload = {
+            EndUserIp: EndUserIp,
+            ClientId: String(CLIENT_ID),
+            UserName: String(USERNAME),
+            Password: String(PASSWORD),
+            TraceId,
+            ResultIndex,
+            SrdvType,
+            SrdvIndex
+          };
+        const response = await axios.post(`${API_URL}SeatMap`, payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Api-Token': TOKEN,
+            }
+        });
+        res.status(200).json(response.data);
+        }
+        catch (error) {
+            console.error('FarePrice Error:', error?.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch fare price' });
+        }    
+    };
+exports.BookFlight = async (req, res) => {
+    try {
+      const {
+        TraceId,
+        ResultIndex,
+        SrdvType,
+        SrdvIndex,
+        PassengerDetails,
+        PaymentDetails
+      } = req.body;
+  
+      if (!TraceId || !ResultIndex || !SrdvType || !SrdvIndex || !PassengerDetails || !PaymentDetails) {
+        return res.status(400).json({ error: 'Missing required parameters.' });
+      }
+  
+      const payload = {
+        EndUserIp: EndUserIp,
+        ClientId: String(CLIENT_ID),
+        UserName: String(USERNAME),
+        Password: String(PASSWORD),
+        TraceId,
+        ResultIndex,
+        SrdvType,
+        SrdvIndex,
+        PassengerDetails,
+        PaymentDetails
+      };
+  
+      const response = await axios.post(`${API_URL}Book`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Token': TOKEN,
+        }
+      });
+  
+      res.status(200).json(response.data);
+    } catch (error) {
+      console.error('Flight Booking Error:', error?.response?.data || error.message);
+      res.status(500).json({ error: 'Failed to book flight' });
+    }
+};

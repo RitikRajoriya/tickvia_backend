@@ -1,61 +1,89 @@
-const db = require('../db');
+const db = require('../config/db');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
-const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY;
+// AmazeSMS config
+const SMS_API_URL = "https://amazesms.in/api/pushsms";
+const SMS_CONFIG = {
+  user: "Thegovibe",
+  authkey: "92K8IQG8MHEk",
+  sender: "TGVIBE",
+  entityid: "1001280136024866095",
+  templateid: "1007741649970181823"
+};
 
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// Send OTP API
 exports.sendOtp = async (req, res) => {
-  const { phone } = req.body;
-  const otp = generateOtp();
-
   try {
-    // Save OTP to DB
-    await db.query('INSERT INTO otps (phone, otp) VALUES (?, ?)', [phone, otp]);
+    let { mobile } = req.body;
+    if (!mobile) return res.status(400).json({ error: 'Mobile number is required' });
 
-    // Send OTP via Fast2SMS
-    const result = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
-      variables_values: otp,
-      route: 'otp',
-      numbers: phone,
-    }, {
-      headers: {
-        'authorization': FAST2SMS_API_KEY,
-      },
+    // Ensure country code
+     mobile.startsWith('91') ? mobile : '91' + mobile;
+
+    const otp = generateOTP();
+    const text = `Your OTP for The tick via login is ${otp}. It is valid for 5 minutes. Please do not share this OTP with anyone.`;
+
+    // Save OTP to DB
+    await db.query('INSERT INTO otps (mobile, otp) VALUES (?, ?)', [mobile, otp]);
+
+    // Send OTP via SMS
+    await axios.get(SMS_API_URL, {
+      params: {
+        user: SMS_CONFIG.user,
+        authkey: SMS_CONFIG.authkey,
+        sender: SMS_CONFIG.sender,
+        mobile,
+        text,
+        entityid: SMS_CONFIG.entityid,
+        templateid: SMS_CONFIG.templateid
+      }
     });
 
-    res.json({ message: 'OTP sent successfully!' });
+    res.json({
+      success: true,
+      message: 'OTP sent successfully'
+      // Do not send OTP in response in production!
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('OTP send error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Failed to send OTP' });
   }
 };
 
+// Verify OTP API
 exports.verifyOtp = async (req, res) => {
-  const { phone, otp } = req.body;
+  const { mobile, otp } = req.body;
+  mobile.startsWith('91') ? mobile : '91' + mobile;
+// console.log(`Mobile: ${mobile}/, OTP: ${otp}`);
+  if (!mobile || !otp) {
+    return res.status(400).json({ error: 'Mobile number and OTP are required' });
+  }
 
   try {
-    const [rows] = await db.query('SELECT * FROM otps WHERE phone = ? ORDER BY created_at DESC LIMIT 1', [phone]);
-
+    // Get latest OTP for this phone
+    const [rows] = await db.query('SELECT * FROM otps WHERE mobile = ? ORDER BY created_at DESC LIMIT 1', [mobile]);
     if (rows.length === 0 || rows[0].otp !== otp) {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
-    // Optionally delete used OTP
-    await db.query('DELETE FROM otps WHERE phone = ?', [phone]);
+    // Delete used OTP
+    await db.query('DELETE FROM otps WHERE mobile = ?', [mobile]);
 
     // Create user if not exists
-    const [user] = await db.query('SELECT * FROM users WHERE phone = ?', [phone]);
+    const [user] = await db.query('SELECT * FROM users WHERE mobile = ?', [mobile]);
     if (user.length === 0) {
-      await db.query('INSERT INTO users (phone) VALUES (?)', [phone]);
+      await db.query('INSERT INTO users (mobile) VALUES (?)', [mobile]);
     }
 
     // Generate JWT
-    const token = jwt.sign({ phone }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({  mobile }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ message: 'Login successful', token });
+    res.json({ message: 'OTP verified successfully', token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

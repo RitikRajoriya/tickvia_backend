@@ -34,4 +34,7 @@ router.post('/search', flightController.searchFlights);
 router.post('/search/route', flightController.routeTrip); 
 router.post('/farerule', flightController.FareRule); 
 router.post('/fareprice', flightController.FarePrice); 
+router.post('/SSR', flightController.SSRBook);
+router.post('/seatmap', flightController.SeatMaps);
+router.post('/bookflight', flightController.BookFlight);
 module.exports = router;
