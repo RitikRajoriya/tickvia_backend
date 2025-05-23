@@ -1,6 +1,7 @@
-const flightController = require('../controllers/flightContoller');
 const express = require('express');
 const router = express.Router();
+const flightController = require('../controllers/flightController'); 
+
 /**
  * @swagger
  * /flights/search:
@@ -35,6 +36,7 @@ router.post('/search/route', flightController.routeTrip);
 router.post('/farerule', flightController.FareRule); 
 router.post('/fareprice', flightController.FarePrice); 
 router.post('/SSR', flightController.SSRBook);
+router.post('/farequote', flightController.FareQuote);
 router.post('/seatmap', flightController.SeatMaps);
-router.post('/bookflight', flightController.BookFlight);
+// router.post('/bookflight', flightController.BookFlight);
 module.exports = router;
