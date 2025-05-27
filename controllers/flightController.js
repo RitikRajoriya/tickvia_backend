@@ -71,6 +71,7 @@ exports.routeTrip = async (req, res) => {
       returnDate,
       adults,
       childCount,
+      FlightCabinClass,
       infantCount,
     } = req.body;
 
@@ -98,7 +99,7 @@ exports.routeTrip = async (req, res) => {
         {
           Origin: origin,
           Destination: destination,
-          FlightCabinClass: "1",
+          FlightCabinClass: FlightCabinClass,
           PreferredDepartureTime: `${departureDate}T00:00:00`,
           PreferredArrivalTime: `${departureDate}T00:00:00`,
         },
@@ -164,36 +165,7 @@ exports.FareRule = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch fare rule" });
   }
 };
-exports.FarePrice = async (req, res) => {
-  try {
-    const { TraceId, ResultIndex, SrdvType, SrdvIndex } = req.body;
 
-    if (!TraceId || !ResultIndex || !SrdvType || !SrdvIndex) {
-      return res.status(400).json({ error: "Missing required parameters." });
-    }
-
-    const payload = {
-      EndUserIp: "49.43.5.204",
-      ClientId: String(CLIENT_ID),
-      UserName: String(USERNAME),
-      Password: String(PASSWORD),
-      TraceId,
-      ResultIndex,
-      SrdvType,
-      SrdvIndex,
-    };
-    const response = await axios.post(`${API_URL}FarePrice`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-        "Api-Token": TOKEN,
-      },
-    });
-    res.status(200).json(response.data);
-  } catch (error) {
-    console.error("FarePrice Error:", error?.response?.data || error.message);
-    res.status(500).json({ error: "Failed to fetch fare price" });
-  }
-};
 
 exports.SSRBook = async (req, res) => {
   try {
