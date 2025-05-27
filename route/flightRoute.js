@@ -5,8 +5,9 @@ const flightController = require('../controllers/flightController');
 
 
 // Route to search for flights
+router.post('/multiCity', flightController.multiCity);
 router.post('/search', flightController.searchFlights); 
-router.post('/search/route', flightController.routeTrip); 
+router.post('/roundTrip', flightController.routeTrip);
 router.post('/farerule', flightController.FareRule); 
 router.post('/SSR', flightController.SSRBook);
 router.post('/farequote', flightController.FareQuote);

@@ -294,7 +294,61 @@ exports.SeatMaps = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch fare price" });
   }
 };
+exports.multiCity = async (req, res) => {
+  try {
+    const {
+      segments = [],
+      adults = 1,
+      childCount = 0,
+      infantCount = 0,
+    } = req.body;
 
+    if (!Array.isArray(segments) || segments.length < 2) {
+      return res.status(400).json({ error: 'At least two segments are required for multi-city search.' });
+    }
+
+    const formattedSegments = segments.map((seg, index) => {
+      if (!seg.origin || !seg.destination || !seg.departureDate) {
+        throw new Error(Missing data in segment ${index + 1});
+      }
+
+      const formattedDate = new Date(seg.departureDate).toISOString().split("T")[0];
+
+      return {
+        Origin: seg.origin,
+        Destination: seg.destination,
+        FlightCabinClass: seg.flightCabinClass || "1", // default to Economy
+        PreferredDepartureTime: ${formattedDate}T00:00:00,
+        PreferredArrivalTime: ${formattedDate}T00:00:00
+      };
+    });
+
+    const payload = {
+      EndUserIp: EndUserIp,
+      ClientId: String(CLIENT_ID),
+      UserName: String(USERNAME),
+      Password: String(PASSWORD),
+      AdultCount: String(adults),
+      ChildCount: String(childCount),
+      InfantCount: String(infantCount),
+      JourneyType: "3", // Multi-city
+      Segments: formattedSegments,
+      Sources: null
+    };
+
+    const response = await axios.post(`${API_URL}Search`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        "Api-Token": TOKEN,
+      },
+    });
+
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Dynamic MultiCity Search Error:", error?.response?.data || error.message);
+    res.status(500).json({ error: "Failed to search multi-city flights" });
+  }
+};
 // exports.BookFlight = async (req, res) => {
 //     try {
 //       const {
