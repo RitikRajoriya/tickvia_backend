@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const flightController = require('../controllers/flightController'); 
 
-
-
 // Route to search for flights
 router.post('/multiCity', flightController.multiCity);
 router.post('/search', flightController.searchFlights); 

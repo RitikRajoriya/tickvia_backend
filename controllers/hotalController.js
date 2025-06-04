@@ -25,7 +25,7 @@ exports.HotelSearch = async (req, res) => {
     const {
       CheckInDate,
       CheckOutDate,
-      NoOfNights = "1",
+      NoOfNights ,
       CountryCode = "IN",
       CityId,
       NoOfRooms = "1",

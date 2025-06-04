@@ -309,7 +309,7 @@ exports.multiCity = async (req, res) => {
 
     const formattedSegments = segments.map((seg, index) => {
       if (!seg.origin || !seg.destination || !seg.departureDate) {
-        throw new Error(Missing data in segment ${index + 1});
+        throw new Error(`Missing data in segment ${index + 1}`);
       }
 
       const formattedDate = new Date(seg.departureDate).toISOString().split("T")[0];
@@ -318,8 +318,8 @@ exports.multiCity = async (req, res) => {
         Origin: seg.origin,
         Destination: seg.destination,
         FlightCabinClass: seg.flightCabinClass || "1", // default to Economy
-        PreferredDepartureTime: ${formattedDate}T00:00:00,
-        PreferredArrivalTime: ${formattedDate}T00:00:00
+        PreferredDepartureTime: `${formattedDate}T00:00:00`,
+        PreferredArrivalTime: `${formattedDate}T00:00:00`
       };
     });
 

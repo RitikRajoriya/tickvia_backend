@@ -7,6 +7,8 @@ const db = require('./config/db');
 const flightRoutes = require('./route/flightRoute');
 const hotelRoutes = require('./route/hotelRoute');
 const authRoutes = require('./route/authRoute');
+const rechargeRoutes = require('./route/rechargeRoute');
+const busRoute = require('./route/busRoute');
 // Swagger
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swaggerConfig');
@@ -19,6 +21,8 @@ app.use(cors());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/flights', flightRoutes);
 app.use('/api/v1/hotel', hotelRoutes);
+app.use('/api/v1/recharge', rechargeRoutes);
+app.use('/api/v1/bus', busRoute);
 // Swagger docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -35,4 +39,3 @@ db.query('SELECT 1')
             console.log(`Server running on port ${PORT}`);
             console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
         });
-    

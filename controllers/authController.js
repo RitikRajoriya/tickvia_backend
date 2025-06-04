@@ -3,13 +3,14 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
 // AmazeSMS config
+
 const SMS_API_URL = "https://amazesms.in/api/pushsms";
 const SMS_CONFIG = {
   user: "Thegovibe",
   authkey: "92K8IQG8MHEk",
   sender: "TGVIBE",
-  entityid: "1001280136024866095",
-  templateid: "1007741649970181823"
+  entityid:"1001280136024866095",
+templateid:"1007741649970181823"
 };
 
 function generateOTP() {
@@ -46,7 +47,8 @@ exports.sendOtp = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'OTP sent successfully'
+      message: 'OTP sent successfully',
+      otp // For testing purposes, include OTP in response
       // Do not send OTP in response in production!
     });
   } catch (err) {
@@ -86,5 +88,26 @@ exports.verifyOtp = async (req, res) => {
     res.json({ message: 'OTP verified successfully', token });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+exports.getProfile = async (req, res) => {
+
+  const mobile = req.user?.mobile || req.query.mobile;
+
+  if (!mobile) {
+    return res.status(400).json({ error: 'Mobile number is required' });
+  }
+
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE mobile = ?', [mobile]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ profile: rows[0] });
+  } catch (err) {
+    console.error('Database error:', err); // Optional logging
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
